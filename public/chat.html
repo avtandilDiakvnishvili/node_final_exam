@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+</head>
+<body>
+    <h1>Chat</h1>
+    
+    <!-- Display connected users -->
+    <h2>Connected Users:</h2>
+    <ul id="userList"></ul>
+
+    <!-- Display message history -->
+    <h2>Message History:</h2>
+    <div id="messageHistory"></div>
+
+    <!-- Message input form -->
+    <form id="chatForm">
+        <input type="text" id="messageInput" placeholder="Type your message...">
+        <button type="submit">Send</button>
+    </form>
+
+    <!-- Socket.IO -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Listen for message history
+        socket.on('message history', (messages) => {
+            const messageHistoryDiv = document.getElementById('messageHistory');
+            messageHistoryDiv.innerHTML = '';
+            messages.forEach((message) => {
+                console.log(message)
+                messageHistoryDiv.innerHTML += `<p><strong>${message}:</strong> ${message.message_text}</p>`;
+            });
+        });
+
+        // Listen for connected users
+        socket.on('user list', (users) => {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+            users.forEach((user) => {
+                userList.innerHTML += `<li>${user}</li>`;
+            });
+        });
+
+        // Listen for new messages
+        socket.on('chat message', (data) => {
+            const messageHistoryDiv = document.getElementById('messageHistory');
+            messageHistoryDiv.innerHTML += `<p><strong>${data.username}:</strong> ${data.message}</p>`;
+        });
+
+        // Handle chat form submission
+        document.getElementById('chatForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            if (message !== '') {
+                socket.emit('chat message', message);
+                messageInput.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
